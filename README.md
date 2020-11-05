@@ -1,6 +1,8 @@
 # domain driven bounded contexts and modules
 
-* https://www.baeldung.com/java-modules-ddd-bounded-contexts
+* https://github.com/thefirstwind/ddd-sample01-modules
+
+[TOC]
 
 ## 1. DDD Bounded Contexts
 
@@ -14,10 +16,34 @@ In particular, the main benefit of ubiquitous language is grouping together proj
 
 Additionally, multiple contexts may work with the same thing. However, it may have different meanings inside each of these contexts.
 
+``` plantuml
+@startuml
+left to right direction
+card card as "Domain"{
+    storage storage as "Bounded  Context"{
+        card leaf1
+        card leaf2
+        card leaf3
+    }
+}
+leaf1 -- leaf2
+leaf1 -- leaf3
+@enduml
+```
 
 ### 1.2. Order Context
 Let’s start implementing our application by defining the Order Context. This context contains two entities: OrderItem and CustomerOrder.
 
+``` plantuml
+@startuml
+left to right direction
+    storage storage as "Order  Context"{
+        card leaf1 as "OrderItem"
+        card leaf2 as "CustomerOrder"
+    }
+leaf1 -- leaf2
+@enduml
+```
 
 
 The CustomerOrder entity is an aggregate root:
@@ -93,6 +119,20 @@ What’s essential is that this interface is not implemented inside this context
 
 ### 1.3. Shipping Context
 Now, let's define the Shipping Context. It will also be straightforward and contain three entities: Parcel, PackageItem, and ShippableOrder.
+
+``` plantuml
+@startuml
+left to right direction
+    storage storage as " Shipping  Context"{
+        card leaf1 as "PackageItem"
+        card leaf2 as "Parcel"
+        card leaf3 as "ShippableOrder"
+    }
+leaf1 -- leaf2
+leaf1 -- leaf3
+@enduml
+```
+
 
 Let’s start with the ShippableOrder entity:
 
@@ -239,7 +279,34 @@ Now, it’s time to explore how the Java 9 Module System can support the defined
 
 The Java Platform Module System (JPMS) encourages to build more reliable and strongly encapsulated modules. As a result, these features can help to isolate our contexts and establish clear boundaries.
 
+``` plantuml
+@startuml
 
+class class01 as "Main Module"{
+
+}
+class class02 as "Infrastructure Module"{
+
+}
+class class03 as "Shipping Context Module"{
+
+}
+class class04 as "Order Context Module"{
+
+}
+class class05 as "Shared Kernel Module"{
+
+}
+
+class01 --|> class02
+class02 --|> class03
+class02 --|> class04
+class02 --|> class05
+class03 --|> class05
+class04 --|> class05
+
+@enduml
+```
 
 
 Let's see our final module diagram:
@@ -248,10 +315,12 @@ Let's see our final module diagram:
 ### 3.1. SharedKernel Module
 Let’s start with the SharedKernel module, which doesn't have any dependencies on other modules. So, the module-info.java looks like:
 
+```
 module com.baeldung.dddmodules.sharedkernel {
     exports com.baeldung.dddmodules.sharedkernel.events;
     exports com.baeldung.dddmodules.sharedkernel.service;
 }
+```
 We export module interfaces, so they're available to other modules.
 
 ### 3.2. OrderContext Module
@@ -557,5 +626,4 @@ Next, we've seen how to use the Java 9 Module System along with Bounded Context 
 
 Furthermore, we've covered the default ServiceLoader mechanism for discovering dependencies.
 
-The full source code of the project is available over on GitHub.
 
